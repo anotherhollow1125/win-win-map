@@ -1,0 +1,30 @@
+.object {
+  background-color: transparent;
+  box-sizing: border-box;
+}
+
+.object.child {
+  position: absolute;
+}
+
+.object.base {
+  position: relative;
+  border: 1px solid red;
+  margin-bottom: 10px;
+}
+
+.object.monitor {
+  border: 1px solid blue;
+  background-color: rgba(0, 0, 255, 0.1);
+}
+
+.object.window {
+  border: 1px solid black;
+  border-top: 5px solid black;
+}
+
+@media (prefers-color-scheme: dark) {
+  .object.window {
+    border-color: white;
+  }
+}
