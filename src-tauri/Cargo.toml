@@ -16,7 +16,7 @@ tauri-build = { version = "1.2", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2", features = ["app-all", "fs-all", "global-shortcut-all", "path-all", "process-exit"] }
+tauri = { version = "1.2", features = ["app-all", "fs-all", "global-shortcut-all", "path-all", "process-exit", "window-set-size"] }
 anyhow = "1.0.68"
 once_cell = "1.17.0"
 tokio = { version = "1.25.0", features = ["full"] }

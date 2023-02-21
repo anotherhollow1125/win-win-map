@@ -5,6 +5,8 @@ export interface WindowFrameProps {
   top: number;
 }
 
-export default function WindowFrame(props: WindowFrameProps) {
+const WindowFrame = (props: WindowFrameProps) => {
   return <div className="object child window" style={props}></div>;
-}
+};
+
+export default WindowFrame;

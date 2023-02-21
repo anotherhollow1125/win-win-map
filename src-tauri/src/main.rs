@@ -22,8 +22,40 @@ fn get_windows() -> Result<Vec<WinInfo>, String> {
 }
 
 #[tauri::command]
+fn get_window(hwnd: u64) -> Result<WinInfo, String> {
+    let win_info = WinInfo::from_hwnd(hwnd as _)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "Failed to get WinInfo from hwnd".to_owned())?;
+    Ok(win_info)
+}
+
+#[tauri::command]
 fn set_cursor_pos(x: i32, y: i32) -> Result<(), String> {
     mouse::set_cursor_pos(x, y).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn set_window_pos_and_size(
+    hwnd: u64,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+) -> Result<(), String> {
+    let win_info = WinInfo::from_hwnd(hwnd as _)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "Failed to get WinInfo from hwnd".to_owned())?;
+    win_info
+        .move_and_resize(x, y, width, height)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn set_foreground(hwnd: u64) -> Result<(), String> {
+    let win_info = WinInfo::from_hwnd(hwnd as _)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "Failed to get WinInfo from hwnd".to_owned())?;
+    win_info.set_foreground().map_err(|e| e.to_string())
 }
 
 #[tokio::main]
@@ -38,7 +70,10 @@ async fn main() -> Result<()> {
         .invoke_handler(tauri::generate_handler![
             get_canvas,
             get_windows,
-            set_cursor_pos
+            get_window,
+            set_cursor_pos,
+            set_window_pos_and_size,
+            set_foreground,
         ])
         .setup(|app| {
             let _notification_thread = backend::tauri_setup(app, rx);

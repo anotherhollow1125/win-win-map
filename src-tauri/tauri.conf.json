@@ -11,6 +11,9 @@
   },
   "tauri": {
     "allowlist": {
+      "window": {
+        "setSize": true
+      },
       "app": {
         "all": true
       },

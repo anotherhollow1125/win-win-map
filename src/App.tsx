@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
-function App() {
+const App = () => {
   // https://amateur-engineer.com/react-mui-dark-mode/
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const theme = useMemo(
@@ -22,6 +22,6 @@ function App() {
       <AppMain />
     </ThemeProvider>
   );
-}
+};
 
 export default App;

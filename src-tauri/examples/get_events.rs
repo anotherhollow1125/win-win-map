@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
                 let win = match windows.get(&hwnd.0) {
                     Some(win) => win,
                     None => {
-                        let Ok(Some(wininfo)) = WinInfo::from_hwnd(hwnd) else { continue };
+                        let Ok(Some(wininfo)) = WinInfo::from_hwnd(hwnd.0) else { continue };
                         windows.insert(hwnd.0, wininfo);
                         windows.get(&hwnd.0).unwrap()
                     }

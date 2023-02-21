@@ -5,6 +5,8 @@ export interface MonitorFrameProps {
   top: number;
 }
 
-export default function MonitorFrame(props: MonitorFrameProps) {
+export const MonitorFrame = (props: MonitorFrameProps) => {
   return <div className="object child monitor" style={props}></div>;
-}
+};
+
+export default MonitorFrame;

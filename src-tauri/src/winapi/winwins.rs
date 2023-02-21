@@ -12,7 +12,8 @@ use windows::{
         Foundation::{GetLastError, BOOL, HWND, LPARAM},
         UI::WindowsAndMessaging::{
             EnumWindows, GetForegroundWindow, GetWindowInfo, GetWindowTextW, MoveWindow,
-            SetWindowPos, HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE, WS_MINIMIZE, WS_VISIBLE,
+            SetForegroundWindow, /*SetWindowPos, HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE, */
+            WS_MINIMIZE, WS_VISIBLE,
         },
     },
 };
@@ -95,8 +96,8 @@ static VDMTH: Lazy<
 > = Lazy::new(|| Mutex::new(Some(VDM::filter_thread())));
 
 impl WinInfo {
-    pub fn from_hwnd(hwnd: HWND) -> Result<Option<Self>> {
-        judge_active_window(hwnd)
+    pub fn from_hwnd(hwnd: isize) -> Result<Option<Self>> {
+        judge_active_window(HWND(hwnd))
     }
 
     pub fn move_to(&self, x: i32, y: i32) -> Result<()> {
@@ -126,12 +127,27 @@ impl WinInfo {
         Ok(())
     }
 
-    // アクティブにするのではなく、常に最前面に表示されてしまうので注意
+    // この実装だと、アクティブにするのではなく、常に最前面に表示されてしまう
+    /*
     pub fn set_foreground(&self) -> Result<()> {
         unsafe {
             let res = SetWindowPos(self.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
             if !res.as_bool() {
                 return Err(anyhow!("Failed to SetWindowPos: {:?}", GetLastError()));
+            }
+        }
+        Ok(())
+    }
+    */
+
+    pub fn set_foreground(&self) -> Result<()> {
+        unsafe {
+            let res = SetForegroundWindow(self.hwnd);
+            if !res.as_bool() {
+                return Err(anyhow!(
+                    "Failed to SetForegroundWindow: {:?}",
+                    GetLastError()
+                ));
             }
         }
         Ok(())

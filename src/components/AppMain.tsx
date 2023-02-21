@@ -1,25 +1,39 @@
-import IntegratedFrame from "@/components/IntegratedFrame";
-import useAppState from "@/hooks/app_hook";
-import { useEffect } from "react";
-import CursorConfigElm from "@/components/CursorConfigElm";
+import IntegratedFrame from "@/components/frameComponents/IntegratedFrame";
+import useAppState from "@/hooks/app-hook";
+import ConfigElm from "@/components/configComponents/ConfigElm";
+import ListComponent from "@/components/listComponents/ListComponent";
+import { useMediaQuery } from "@mui/material";
 
-function AppMain() {
-  const [frames, config, configMethods] = useAppState();
-
-  useEffect(() => {
-    configMethods.setSummonPoint({ x: 100, y: 100 });
-  }, []);
+const AppMain = () => {
+  const [framesInfo, config, configMethods, updateFrames] = useAppState();
+  const isMobile = useMediaQuery("(max-width: 600px)");
+  const isPC = !isMobile;
 
   return (
     <>
-      {frames ? <IntegratedFrame {...frames} /> : <>Loading...</>}
+      {isPC && framesInfo ? (
+        <IntegratedFrame
+          framesInfo={framesInfo}
+          clickHandle={() => updateFrames()}
+        />
+      ) : (
+        <></>
+      )}
       {config ? (
-        <CursorConfigElm config={config} configMethods={configMethods} />
+        <ConfigElm config={config} configMethods={configMethods} />
       ) : (
         <>Loading...</>
       )}
+      {isPC && framesInfo && config ? (
+        (() => {
+          const windows = framesInfo.windows.map((w) => w.original);
+          return <ListComponent windows={windows} config={config} />;
+        })()
+      ) : (
+        <></>
+      )}
     </>
   );
-}
+};
 
 export default AppMain;

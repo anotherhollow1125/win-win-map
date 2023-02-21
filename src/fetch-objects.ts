@@ -1,24 +1,24 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import { WinInfo, Canvas } from "@/winwin-type";
-import { IntegratedFrameProps } from "./components/IntegratedFrame";
+import { FramesInfo } from "@/hooks/frame-hook";
 
 // ハードコードでごめん...
 const margin = 8;
 
-export function calcScale(
+export const calcScale = (
   width: number,
   height: number,
   appWidth: number,
   appHeight: number
-): { scale: number; w_is_larger: boolean } {
+): { scale: number; w_is_larger: boolean } => {
   const x_scale = width / (appWidth - margin * 2);
   const y_scale = height / (appHeight - margin * 2);
   const w_is_larger = width > height;
   const scale = width > height ? x_scale : y_scale;
   return { scale, w_is_larger };
-}
+};
 
-export default async function fetchObjects(): Promise<IntegratedFrameProps> {
+export const fetchObjects = async (): Promise<FramesInfo> => {
   const canvas = await invoke<Canvas>("get_canvas");
   const { scale } = calcScale(
     canvas.max_x - canvas.min_x,
@@ -46,6 +46,7 @@ export default async function fetchObjects(): Promise<IntegratedFrameProps> {
       top: (w.top - canvas.min_y) / scale,
       width: w.width / scale,
       height: w.height / scale,
+      original: w,
     };
   });
 
@@ -55,4 +56,6 @@ export default async function fetchObjects(): Promise<IntegratedFrameProps> {
     monitors: monitors,
     windows: [...windows],
   };
-}
+};
+
+export default fetchObjects;

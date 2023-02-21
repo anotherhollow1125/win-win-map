@@ -9,21 +9,52 @@ import {
 import { register, unregisterAll } from "@tauri-apps/api/globalShortcut";
 import { invoke } from "@tauri-apps/api/tauri";
 
+export interface ThresholdRect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+export interface WH {
+  width: number;
+  height: number;
+}
+
 export interface Config {
   summon_mouse_cursor_shortcut: string | undefined;
   summon_point: { x: number; y: number } | undefined;
+  auto_summon_enabled: boolean | undefined;
+  auto_summon_threshold: ThresholdRect | undefined;
+  auto_summon_size: WH | undefined;
+  auto_summon_shortcut: string | undefined;
 }
 
 const DefaultConfig = () => {
   return {
-    summon_mouse_cursor_shortcut: undefined,
+    summon_mouse_cursor_shortcut: "",
     summon_point: { x: 0, y: 0 },
+    auto_summon_enabled: false,
+    auto_summon_threshold: {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+    },
+    auto_summon_size: {
+      width: 0,
+      height: 0,
+    },
   } as Config;
 };
 
 export interface ConfigMethods {
   setSummonMouseCursorShortcut: (shortcut: string) => void;
   setSummonPoint: (point: { x: number; y: number }) => void;
+  setAutoSummonEnabled: (enabled: boolean) => void;
+  setAutoSummonThreshold: (threshold: ThresholdRect) => void;
+  setAutoSummonSize: (size: WH) => void;
+  setAutoSummonShortcut: (shortcut: string) => void;
 }
 
 type useConfigRes = [Config | undefined, ConfigMethods];
@@ -33,6 +64,42 @@ const useConfig = (): useConfigRes => {
   const initializeAsyncFn = useRef<(() => Promise<void>) | undefined>(
     undefined
   );
+
+  const setSummonMouseCursorShortcut = (shortcut: string) => {
+    const c = config ?? DefaultConfig();
+    c.summon_mouse_cursor_shortcut = shortcut;
+    setConfig({ ...c });
+  };
+
+  const setSummonPoint = (point: { x: number; y: number }) => {
+    const c = config ?? DefaultConfig();
+    c.summon_point = point;
+    setConfig({ ...c });
+  };
+
+  const setAutoSummonEnabled = (enabled: boolean) => {
+    const c = config ?? DefaultConfig();
+    c.auto_summon_enabled = enabled;
+    setConfig({ ...c });
+  };
+
+  const setAutoSummonThreshold = (threshold: ThresholdRect) => {
+    const c = config ?? DefaultConfig();
+    c.auto_summon_threshold = threshold;
+    setConfig({ ...c });
+  };
+
+  const setAutoSummonSize = (size: WH) => {
+    const c = config ?? DefaultConfig();
+    c.auto_summon_size = size;
+    setConfig({ ...c });
+  };
+
+  const setAutoSummonShortcut = (shortcut: string) => {
+    const c = config ?? DefaultConfig();
+    c.auto_summon_shortcut = shortcut;
+    setConfig({ ...c });
+  };
 
   useEffect(() => {
     if (initializeAsyncFn.current !== undefined) {
@@ -49,8 +116,7 @@ const useConfig = (): useConfigRes => {
       } catch (error) {
         console.warn(error);
         setConfig({
-          summon_mouse_cursor_shortcut: undefined,
-          summon_point: { x: 0, y: 0 },
+          ...DefaultConfig(),
         });
       }
 
@@ -78,6 +144,7 @@ const useConfig = (): useConfigRes => {
       // register shortcut
       await unregisterAll();
 
+      // Cursor Summon Shortcut
       if (
         config.summon_mouse_cursor_shortcut !== undefined &&
         config.summon_mouse_cursor_shortcut !== ""
@@ -89,26 +156,31 @@ const useConfig = (): useConfigRes => {
           await invoke("set_cursor_pos", config.summon_point);
         });
       }
+
+      // Auto Summon Toggle Shortcut
+      if (
+        config.auto_summon_shortcut !== undefined &&
+        config.auto_summon_shortcut !== ""
+      ) {
+        await register(config.auto_summon_shortcut, async () => {
+          if (config.auto_summon_enabled === undefined) {
+            return;
+          }
+          setAutoSummonEnabled(!config.auto_summon_enabled);
+        });
+      }
     })();
   }, [config]);
-
-  const setMouseCursorSummonShortcut = (shortcut: string) => {
-    const c = config ?? DefaultConfig();
-    c.summon_mouse_cursor_shortcut = shortcut;
-    setConfig({ ...c });
-  };
-
-  const setSummonPoint = (point: { x: number; y: number }) => {
-    const c = config ?? DefaultConfig();
-    c.summon_point = point;
-    setConfig({ ...c });
-  };
 
   return [
     config,
     {
-      setSummonMouseCursorShortcut: setMouseCursorSummonShortcut,
+      setSummonMouseCursorShortcut,
       setSummonPoint,
+      setAutoSummonEnabled,
+      setAutoSummonThreshold,
+      setAutoSummonSize,
+      setAutoSummonShortcut,
     },
   ];
 };
