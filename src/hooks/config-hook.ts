@@ -55,12 +55,14 @@ export interface ConfigMethods {
   setAutoSummonThreshold: (threshold: ThresholdRect) => void;
   setAutoSummonSize: (size: WH) => void;
   setAutoSummonShortcut: (shortcut: string) => void;
+  toggleShowMap: () => void;
 }
 
-type useConfigRes = [Config | undefined, ConfigMethods];
+type useConfigRes = [Config | undefined, ConfigMethods, boolean];
 
 const useConfig = (): useConfigRes => {
   const [config, setConfig] = useState<Config | undefined>(undefined);
+  const [showMap, setShowMap] = useState<boolean>(true);
   const initializeAsyncFn = useRef<(() => Promise<void>) | undefined>(
     undefined
   );
@@ -181,7 +183,9 @@ const useConfig = (): useConfigRes => {
       setAutoSummonThreshold,
       setAutoSummonSize,
       setAutoSummonShortcut,
+      toggleShowMap: () => setShowMap(!showMap),
     },
+    showMap,
   ];
 };
 

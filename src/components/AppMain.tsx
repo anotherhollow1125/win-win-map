@@ -3,32 +3,50 @@ import useAppState from "@/hooks/app-hook";
 import ConfigElm from "@/components/configComponents/ConfigElm";
 import ListComponent from "@/components/listComponents/ListComponent";
 import { useMediaQuery } from "@mui/material";
+import { Box } from "@mui/system";
 
 const AppMain = () => {
-  const [framesInfo, config, configMethods, updateFrames] = useAppState();
+  const [
+    framesInfo,
+    config,
+    configMethods,
+    updateFrames,
+    target,
+    setTarget,
+    showMap,
+  ] = useAppState();
   const isMobile = useMediaQuery("(max-width: 600px)");
   const isPC = !isMobile;
 
   return (
     <>
-      {isPC && framesInfo ? (
-        <IntegratedFrame
-          framesInfo={framesInfo}
-          clickHandle={() => updateFrames()}
-        />
-      ) : (
-        <></>
-      )}
-      {config ? (
-        <ConfigElm config={config} configMethods={configMethods} />
-      ) : (
-        <>Loading...</>
-      )}
+      <Box className="stickyZone">
+        {showMap && isPC && framesInfo ? (
+          <IntegratedFrame
+            framesInfo={framesInfo}
+            clickHandle={() => updateFrames()}
+            target_hwnd={target}
+          />
+        ) : (
+          <></>
+        )}
+        {config ? (
+          <ConfigElm
+            config={config}
+            configMethods={configMethods}
+            showMap={showMap}
+          />
+        ) : (
+          <>Loading...</>
+        )}
+      </Box>
       {isPC && framesInfo && config ? (
-        (() => {
-          const windows = framesInfo.windows.map((w) => w.original);
-          return <ListComponent windows={windows} config={config} />;
-        })()
+        <ListComponent
+          windows={framesInfo.windows}
+          config={config}
+          target={target}
+          setTarget={setTarget}
+        />
       ) : (
         <></>
       )}

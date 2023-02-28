@@ -15,6 +15,7 @@ import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import { useMediaQuery } from "@mui/material";
 import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
+import MapIcon from "@mui/icons-material/Map";
 import { appWindow, LogicalSize } from "@tauri-apps/api/window";
 import { getVersion } from "@tauri-apps/api/app";
 import { useEffect } from "react";
@@ -22,9 +23,10 @@ import { useEffect } from "react";
 interface ConfigElmProps {
   config: Config;
   configMethods: ConfigMethods;
+  showMap: boolean;
 }
 
-const ConfigElm = ({ config, configMethods }: ConfigElmProps) => {
+const ConfigElm = ({ config, configMethods, showMap }: ConfigElmProps) => {
   const [opened, setOpened] = useState(false);
   const isMobile = useMediaQuery("(max-width: 600px)");
   const [version, setVersion] = useState("");
@@ -66,6 +68,20 @@ const ConfigElm = ({ config, configMethods }: ConfigElmProps) => {
         icon={<AutoAwesomeMotionIcon />}
         label={config.auto_summon_shortcut}
         variant={config.auto_summon_enabled ? "filled" : "outlined"}
+        onClick={() => {
+          configMethods.setAutoSummonEnabled(!config.auto_summon_enabled);
+        }}
+        sx={{
+          marginRight: 1,
+        }}
+      />
+      <Chip
+        icon={<MapIcon />}
+        label={"Map"}
+        variant={showMap ? "filled" : "outlined"}
+        onClick={() => {
+          configMethods.toggleShowMap();
+        }}
         sx={{
           marginRight: 1,
         }}
@@ -83,7 +99,7 @@ const ConfigElm = ({ config, configMethods }: ConfigElmProps) => {
           icon={<CloseFullscreenIcon />}
           label={"minify"}
           onClick={() => {
-            appWindow.setSize(new LogicalSize(500, 100));
+            appWindow.setSize(new LogicalSize(600, 100));
           }}
         />
       )}

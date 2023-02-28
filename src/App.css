@@ -1,3 +1,11 @@
+.stickyZone {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px;
+  background-color: #f6f6f6;
+}
+
 .object {
   background-color: transparent;
   box-sizing: border-box;
@@ -19,11 +27,28 @@
 
 .object.window {
   border: 1px solid black;
+  /* border-top: 5px solid black; */
+}
+
+.object.window.active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.object.window.target {
   border-top: 5px solid black;
 }
 
 @media (prefers-color-scheme: dark) {
+  .stickyZone {
+    background-color: #2f2f2f;
+  }
   .object.window {
     border-color: white;
+  }
+  .object.window.active {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .object.window.target {
+    border-top-color: white;
   }
 }

@@ -18,6 +18,7 @@ impl Serialize for WinInfo {
     where
         S: Serializer,
     {
+        let is_foreground = self.is_foreground();
         let mut state = serializer.serialize_struct("WinInfo", 6)?;
         state.serialize_field("hwnd", &self.hwnd.0)?;
         state.serialize_field("title", &self.title)?;
@@ -25,6 +26,7 @@ impl Serialize for WinInfo {
         state.serialize_field("top", &self.top)?;
         state.serialize_field("width", &self.width)?;
         state.serialize_field("height", &self.height)?;
+        state.serialize_field("is_foreground", &is_foreground)?;
         state.end()
     }
 }

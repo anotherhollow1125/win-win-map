@@ -22,6 +22,11 @@ fn get_windows() -> Result<Vec<WinInfo>, String> {
 }
 
 #[tauri::command]
+fn get_thread_windows() -> Result<Vec<WinInfo>, String> {
+    WinInfo::get_thread_windows_info().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn get_window(hwnd: u64) -> Result<WinInfo, String> {
     let win_info = WinInfo::from_hwnd(hwnd as _)
         .map_err(|e| e.to_string())?
@@ -70,6 +75,7 @@ async fn main() -> Result<()> {
         .invoke_handler(tauri::generate_handler![
             get_canvas,
             get_windows,
+            get_thread_windows,
             get_window,
             set_cursor_pos,
             set_window_pos_and_size,

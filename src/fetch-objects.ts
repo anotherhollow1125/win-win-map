@@ -38,7 +38,13 @@ export const fetchObjects = async (): Promise<FramesInfo> => {
     }),
   ];
 
+  const thread_windows_hwnds = await (
+    await invoke<WinInfo[]>("get_thread_windows")
+  ).map((w) => w.hwnd);
+  // console.log("thread_windows_raw", thread_windows_raw);
+
   const windows_raw = await invoke<WinInfo[]>("get_windows");
+  // console.log("windows_raw", windows_raw);
 
   const windows = windows_raw.map((w) => {
     return {
@@ -46,6 +52,7 @@ export const fetchObjects = async (): Promise<FramesInfo> => {
       top: (w.top - canvas.min_y) / scale,
       width: w.width / scale,
       height: w.height / scale,
+      is_relative: thread_windows_hwnds.includes(w.hwnd),
       original: w,
     };
   });

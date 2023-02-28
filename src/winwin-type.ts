@@ -5,6 +5,7 @@ export interface WinInfo {
   top: number;
   width: number;
   height: number;
+  is_foreground: boolean;
 }
 
 export interface Rect {

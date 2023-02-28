@@ -5,12 +5,16 @@ import { Config, ConfigMethods } from "@/hooks/config-hook";
 import { invoke } from "@tauri-apps/api/tauri";
 import useFrames from "@/hooks/frame-hook";
 import { FramesInfo } from "@/hooks/frame-hook";
+import { SetTargetProps } from "@/hooks/frame-hook";
 
 type useAppStateRes = [
   FramesInfo | undefined,
   Config | undefined,
   ConfigMethods,
-  () => Promise<void>
+  () => Promise<void>,
+  number | undefined,
+  (w: SetTargetProps) => void,
+  boolean
 ];
 
 interface Payload {
@@ -123,9 +127,9 @@ export const ManualSummonWindow = (hwnd: number, cnfg: Config) => {
 };
 
 const useAppState = (): useAppStateRes => {
-  const [frames, updateFrames] = useFrames();
+  const [frames, updateFrames, target, setTarget] = useFrames();
   const [appWH, setAppWH] = useState<undefined[]>([undefined]); // resize イベント用のダミー
-  const [config, configMethods] = useConfig();
+  const [config, configMethods, showMap] = useConfig();
   const unlisten = useRef<(() => void) | undefined>(undefined);
 
   const setListenFunc = async (cnfg: Config) => {
@@ -147,7 +151,7 @@ const useAppState = (): useAppStateRes => {
 
   useEffect(() => {
     (async () => {
-      updateFrames();
+      await updateFrames();
       if (config !== undefined) {
         await setListenFunc(config);
       }
@@ -164,13 +168,21 @@ const useAppState = (): useAppStateRes => {
   useEffect(() => {
     (async () => {
       if (config !== undefined) {
-        console.log("setListenFunc");
+        // console.log("setListenFunc");
         await setListenFunc(config);
       }
     })();
   }, [config]);
 
-  return [frames, config, configMethods, updateFrames];
+  return [
+    frames,
+    config,
+    configMethods,
+    updateFrames,
+    target,
+    setTarget,
+    showMap,
+  ];
 };
 
 export default useAppState;

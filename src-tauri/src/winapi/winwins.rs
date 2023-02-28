@@ -10,8 +10,10 @@ use windows::{
     core::HSTRING,
     Win32::{
         Foundation::{GetLastError, BOOL, HWND, LPARAM},
+        System::Threading::GetCurrentThreadId,
         UI::WindowsAndMessaging::{
-            EnumWindows, GetForegroundWindow, GetWindowInfo, GetWindowTextW, MoveWindow,
+            EnumThreadWindows, EnumWindows, GetForegroundWindow, GetWindowInfo, GetWindowTextW,
+            MoveWindow,
             SetForegroundWindow, /*SetWindowPos, HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE, */
             WS_MINIMIZE, WS_VISIBLE,
         },
@@ -160,12 +162,18 @@ impl WinInfo {
 
     pub fn get_windows_info() -> Result<Vec<WinInfo>> {
         let mut wininfo_vec = Vec::new();
-        unsafe {
+        let res = unsafe {
             EnumWindows(
                 Some(enum_windows_proc),
                 LPARAM(&mut wininfo_vec as *mut _ as _),
-            );
-        }
+            )
+            .as_bool()
+        };
+        if !res {
+            return Err(anyhow!("Failed to EnumWindows: {:?}", unsafe {
+                GetLastError()
+            }));
+        };
         Ok(wininfo_vec)
     }
 
@@ -182,6 +190,24 @@ impl WinInfo {
         let res = vdmth.2.recv()?;
 
         Ok(res)
+    }
+
+    pub fn get_thread_windows_info() -> Result<Vec<WinInfo>> {
+        let mut wininfo_vec = Vec::new();
+        let res = unsafe {
+            EnumThreadWindows(
+                GetCurrentThreadId(),
+                Some(enum_windows_proc),
+                LPARAM(&mut wininfo_vec as *mut _ as _),
+            )
+            .as_bool()
+        };
+        if !res {
+            return Err(anyhow!("Failed to EnumThreadWindows: {:?}", unsafe {
+                GetLastError()
+            }));
+        }
+        Ok(wininfo_vec)
     }
 
     pub fn drop_vdmth() -> Result<()> {

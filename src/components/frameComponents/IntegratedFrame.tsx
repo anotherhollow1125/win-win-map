@@ -7,11 +7,13 @@ import { FramesInfo } from "@/hooks/frame-hook";
 export interface IntegratedFrameProps {
   framesInfo: FramesInfo;
   clickHandle: () => void;
+  target_hwnd?: number;
 }
 
 const FrameManager = ({
   framesInfo: { width, height, monitors, windows },
   clickHandle,
+  target_hwnd,
 }: IntegratedFrameProps) => {
   return (
     <div
@@ -23,7 +25,16 @@ const FrameManager = ({
         return <MonitorFrame key={index} {...monitor} />;
       })}
       {windows.map((window, index) => {
-        return <WindowFrame key={index} {...window} />;
+        return (
+          <WindowFrame
+            key={index}
+            is_target={
+              target_hwnd ? target_hwnd === window.original.hwnd : false
+            }
+            is_active={window.original.is_foreground}
+            {...window}
+          />
+        );
       })}
     </div>
   );
