@@ -24,10 +24,13 @@ export interface WH {
 export interface Config {
   summon_mouse_cursor_shortcut: string | undefined;
   summon_point: { x: number; y: number } | undefined;
-  auto_summon_enabled: boolean | undefined;
+  auto_summon_enabled: boolean;
   auto_summon_threshold: ThresholdRect | undefined;
   auto_summon_size: WH | undefined;
   auto_summon_shortcut: string | undefined;
+  winwinmap_summon_shortcut: string | undefined;
+  showMap: boolean;
+  opened: boolean;
 }
 
 const DefaultConfig = () => {
@@ -45,6 +48,8 @@ const DefaultConfig = () => {
       width: 0,
       height: 0,
     },
+    showMap: true,
+    opened: false,
   } as Config;
 };
 
@@ -55,14 +60,15 @@ export interface ConfigMethods {
   setAutoSummonThreshold: (threshold: ThresholdRect) => void;
   setAutoSummonSize: (size: WH) => void;
   setAutoSummonShortcut: (shortcut: string) => void;
+  setWinWinMapSummonShortcut: (shortcut: string) => void;
   toggleShowMap: () => void;
+  toggleOpened: () => void;
 }
 
-type useConfigRes = [Config | undefined, ConfigMethods, boolean];
+type useConfigRes = [Config | undefined, ConfigMethods];
 
 const useConfig = (): useConfigRes => {
   const [config, setConfig] = useState<Config | undefined>(undefined);
-  const [showMap, setShowMap] = useState<boolean>(true);
   const initializeAsyncFn = useRef<(() => Promise<void>) | undefined>(
     undefined
   );
@@ -100,6 +106,24 @@ const useConfig = (): useConfigRes => {
   const setAutoSummonShortcut = (shortcut: string) => {
     const c = config ?? DefaultConfig();
     c.auto_summon_shortcut = shortcut;
+    setConfig({ ...c });
+  };
+
+  const setWinWinMapSummonShortcut = (shortcut: string) => {
+    const c = config ?? DefaultConfig();
+    c.winwinmap_summon_shortcut = shortcut;
+    setConfig({ ...c });
+  };
+
+  const toggleShowMap = () => {
+    const c = config ?? DefaultConfig();
+    c.showMap = !c.showMap;
+    setConfig({ ...c });
+  };
+
+  const toggleOpened = () => {
+    const c = config ?? DefaultConfig();
+    c.opened = !c.opened;
     setConfig({ ...c });
   };
 
@@ -171,6 +195,26 @@ const useConfig = (): useConfigRes => {
           setAutoSummonEnabled(!config.auto_summon_enabled);
         });
       }
+
+      // WinWinMap Summon Shortcut
+      if (
+        config.winwinmap_summon_shortcut !== undefined &&
+        config.winwinmap_summon_shortcut !== "" &&
+        config.summon_point !== undefined &&
+        config.auto_summon_size !== undefined
+      ) {
+        const x = config.summon_point.x;
+        const y = config.summon_point.y;
+        const wh = config.auto_summon_size;
+        await register(config.winwinmap_summon_shortcut, async () => {
+          await invoke("set_thread_window_pos_and_size", {
+            x: x,
+            y: y,
+            width: wh.width,
+            height: wh.height,
+          });
+        });
+      }
     })();
   }, [config]);
 
@@ -183,9 +227,10 @@ const useConfig = (): useConfigRes => {
       setAutoSummonThreshold,
       setAutoSummonSize,
       setAutoSummonShortcut,
-      toggleShowMap: () => setShowMap(!showMap),
+      setWinWinMapSummonShortcut,
+      toggleShowMap,
+      toggleOpened,
     },
-    showMap,
   ];
 };
 

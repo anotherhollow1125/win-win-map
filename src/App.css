@@ -1,5 +1,4 @@
-.stickyZone {
-  position: sticky;
+.mapZone {
   top: 0;
   z-index: 1;
   padding: 8px;
@@ -39,7 +38,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .stickyZone {
+  .mapZone {
     background-color: #2f2f2f;
   }
   .object.window {

@@ -12,6 +12,7 @@ interface FrameRowComponentProps {
   config: Config;
   target: number | undefined;
   setTarget: (w: SetTargetProps) => void;
+  accessable_windows: WinInfo[];
 }
 
 const FrameRowComponent = ({
@@ -19,13 +20,18 @@ const FrameRowComponent = ({
   config,
   target,
   setTarget,
+  accessable_windows,
 }: FrameRowComponentProps) => {
   return (
     <Grid container spacing={2} alignItems="center">
       <Grid item xs={1}>
         <IconButton
           onClick={() => {
-            ManualSummonWindow(window.original.hwnd, config);
+            ManualSummonWindow(
+              window.original.hwnd,
+              config,
+              accessable_windows
+            );
           }}
         >
           <MoveUpIcon />

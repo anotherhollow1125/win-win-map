@@ -6,22 +6,18 @@ import { useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 
 const AppMain = () => {
-  const [
-    framesInfo,
-    config,
-    configMethods,
-    updateFrames,
-    target,
-    setTarget,
-    showMap,
-  ] = useAppState();
+  const [framesInfo, config, configMethods, updateFrames, target, setTarget] =
+    useAppState();
   const isMobile = useMediaQuery("(max-width: 600px)");
   const isPC = !isMobile;
 
   return (
     <>
-      <Box className="stickyZone">
-        {showMap && isPC && framesInfo ? (
+      <Box
+        className="mapZone"
+        sx={{ position: config?.opened ?? false ? "static" : "sticky" }}
+      >
+        {(config?.showMap ?? false) && isPC && framesInfo ? (
           <IntegratedFrame
             framesInfo={framesInfo}
             clickHandle={() => updateFrames()}
@@ -31,11 +27,7 @@ const AppMain = () => {
           <></>
         )}
         {config ? (
-          <ConfigElm
-            config={config}
-            configMethods={configMethods}
-            showMap={showMap}
-          />
+          <ConfigElm config={config} configMethods={configMethods} />
         ) : (
           <>Loading...</>
         )}
@@ -46,6 +38,7 @@ const AppMain = () => {
           config={config}
           target={target}
           setTarget={setTarget}
+          accessable_windows={framesInfo.windows.map((w) => w.original)}
         />
       ) : (
         <></>

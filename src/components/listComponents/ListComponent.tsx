@@ -10,6 +10,7 @@ interface ListComponentProps {
   config: Config;
   target: number | undefined;
   setTarget: (w: SetTargetProps) => void;
+  accessable_windows: WinInfo[];
 }
 
 const ListComponent = ({
@@ -17,6 +18,7 @@ const ListComponent = ({
   config,
   target,
   setTarget,
+  accessable_windows,
 }: ListComponentProps) => {
   return (
     <List>
@@ -27,6 +29,7 @@ const ListComponent = ({
             config={config}
             target={target}
             setTarget={setTarget}
+            accessable_windows={accessable_windows}
           />
         </ListItem>
       ))}

@@ -13,8 +13,7 @@ type useAppStateRes = [
   ConfigMethods,
   () => Promise<void>,
   number | undefined,
-  (w: SetTargetProps) => void,
-  boolean
+  (w: SetTargetProps) => void
 ];
 
 interface Payload {
@@ -31,7 +30,33 @@ interface WinInfo {
   height: number;
 }
 
+const isAllowedAccess = (hwnd: number, accessable_windows: WinInfo[]) => {
+  return accessable_windows.map((w) => w.hwnd).includes(hwnd);
+};
+
 const summonWindow = async (
+  hwnd: number,
+  accessable_windows: WinInfo[],
+  pos: { x: number; y: number },
+  wh: { width: number; height: number }
+) => {
+  if (!isAllowedAccess(hwnd, accessable_windows)) {
+    return;
+  }
+
+  setTimeout(async () => {
+    await invoke("set_window_pos_and_size", {
+      hwnd: hwnd,
+      x: pos.x,
+      y: pos.y,
+      width: wh.width,
+      height: wh.height,
+    });
+  }, 100);
+};
+
+/*
+const forceSummonWindow = async (
   hwnd: number,
   pos: { x: number; y: number },
   wh: { width: number; height: number }
@@ -46,6 +71,7 @@ const summonWindow = async (
     });
   }, 100);
 };
+*/
 
 const inThreshold = (cnfg: Config, winInfo: WinInfo): boolean => {
   if (cnfg.auto_summon_threshold === undefined) {
@@ -75,11 +101,19 @@ const summonSize = (cnfg: Config) => {
   };
 };
 
-const tryAutoSummon = async (e: Event<Payload>, cnfg: Config) => {
+const tryAutoSummon = async (
+  e: Event<Payload>,
+  cnfg: Config,
+  accessable_windows: WinInfo[]
+) => {
   let winInfo;
   try {
     winInfo = await invoke<WinInfo>("get_window", { hwnd: e.payload.hwnd });
   } catch {
+    return;
+  }
+
+  if (!isAllowedAccess(winInfo.hwnd, accessable_windows)) {
     return;
   }
 
@@ -104,10 +138,20 @@ const tryAutoSummon = async (e: Event<Payload>, cnfg: Config) => {
     return;
   }
 
-  await summonWindow(e.payload.hwnd, cnfg.summon_point, summonSize(cnfg));
+  await summonWindow(
+    e.payload.hwnd,
+    accessable_windows,
+    cnfg.summon_point,
+    summonSize(cnfg)
+  );
 };
 
-export const ManualSummonWindow = (hwnd: number, cnfg: Config) => {
+export const ManualSummonWindow = (
+  hwnd: number,
+  cnfg: Config,
+  accessable_windows: WinInfo[]
+  // force: boolean = false
+) => {
   if (
     cnfg === undefined ||
     cnfg.summon_point === undefined ||
@@ -117,7 +161,14 @@ export const ManualSummonWindow = (hwnd: number, cnfg: Config) => {
     return;
   }
 
-  summonWindow(hwnd, cnfg.summon_point, summonSize(cnfg));
+  /*
+  if (force) {
+    forceSummonWindow(hwnd, cnfg.summon_point, summonSize(cnfg));
+  } else {
+    summonWindow(hwnd, accessable_windows, cnfg.summon_point, summonSize(cnfg));
+  }
+  */
+  summonWindow(hwnd, accessable_windows, cnfg.summon_point, summonSize(cnfg));
 
   setTimeout(async () => {
     await invoke("set_foreground", {
@@ -129,7 +180,7 @@ export const ManualSummonWindow = (hwnd: number, cnfg: Config) => {
 const useAppState = (): useAppStateRes => {
   const [frames, updateFrames, target, setTarget] = useFrames();
   const [appWH, setAppWH] = useState<undefined[]>([undefined]); // resize イベント用のダミー
-  const [config, configMethods, showMap] = useConfig();
+  const [config, configMethods] = useConfig();
   const unlisten = useRef<(() => void) | undefined>(undefined);
 
   const setListenFunc = async (cnfg: Config) => {
@@ -138,8 +189,10 @@ const useAppState = (): useAppStateRes => {
       unlisten.current?.();
     }
     */
+    const accessable_windows = frames?.windows.map((w) => w.original) ?? [];
+
     const unlstn = await listen<Payload>("update", async (e) => {
-      await tryAutoSummon(e, cnfg);
+      await tryAutoSummon(e, cnfg, accessable_windows);
       await updateFrames();
     });
     // init時二重呼び出しに対処するため、await後に解除
@@ -174,15 +227,7 @@ const useAppState = (): useAppStateRes => {
     })();
   }, [config]);
 
-  return [
-    frames,
-    config,
-    configMethods,
-    updateFrames,
-    target,
-    setTarget,
-    showMap,
-  ];
+  return [frames, config, configMethods, updateFrames, target, setTarget];
 };
 
 export default useAppState;

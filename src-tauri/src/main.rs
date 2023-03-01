@@ -63,6 +63,19 @@ fn set_foreground(hwnd: u64) -> Result<(), String> {
     win_info.set_foreground().map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn set_thread_window_pos_and_size(x: i32, y: i32, width: i32, height: i32) -> Result<(), String> {
+    let win_info = WinInfo::get_thread_windows_info()
+        .map_err(|e| e.to_string())?
+        .into_iter()
+        .next()
+        .ok_or_else(|| "Failed to get WinInfo from hwnd".to_owned())?;
+
+    win_info
+        .move_and_resize(x, y, width, height)
+        .map_err(|e| e.to_string())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
@@ -80,6 +93,7 @@ async fn main() -> Result<()> {
             set_cursor_pos,
             set_window_pos_and_size,
             set_foreground,
+            set_thread_window_pos_and_size,
         ])
         .setup(|app| {
             let _notification_thread = backend::tauri_setup(app, rx);
