@@ -1,6 +1,7 @@
 export interface WinInfo {
   hwnd: number;
   title: string;
+  exe_name?: string;
   left: number;
   top: number;
   width: number;

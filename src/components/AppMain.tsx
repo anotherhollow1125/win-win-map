@@ -36,6 +36,7 @@ const AppMain = () => {
         <ListComponent
           windows={framesInfo.windows}
           config={config}
+          configMethods={configMethods}
           target={target}
           setTarget={setTarget}
           accessable_windows={framesInfo.windows.map((w) => w.original)}

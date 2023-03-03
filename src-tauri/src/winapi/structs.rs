@@ -7,6 +7,7 @@ use windows::Win32::Foundation::{HWND, RECT};
 pub struct WinInfo {
     pub hwnd: HWND,
     pub title: String,
+    pub exe_name: Option<String>,
     pub left: i32,
     pub top: i32,
     pub width: i32,
@@ -22,6 +23,9 @@ impl Serialize for WinInfo {
         let mut state = serializer.serialize_struct("WinInfo", 6)?;
         state.serialize_field("hwnd", &self.hwnd.0)?;
         state.serialize_field("title", &self.title)?;
+        if let Some(exe_name) = self.exe_name.as_ref() {
+            state.serialize_field("exe_name", exe_name)?;
+        }
         state.serialize_field("left", &self.left)?;
         state.serialize_field("top", &self.top)?;
         state.serialize_field("width", &self.width)?;

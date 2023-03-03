@@ -19,6 +19,10 @@
   border: 1px solid red;
 }
 
+.disabled {
+  opacity: 0.5;
+}
+
 .object.monitor {
   border: 1px solid blue;
   background-color: rgba(0, 0, 255, 0.1);

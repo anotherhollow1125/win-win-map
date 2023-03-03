@@ -54,6 +54,7 @@ export const fetchObjects = async (): Promise<FramesInfo> => {
       height: w.height / scale,
       is_relative: thread_windows_hwnds.includes(w.hwnd),
       original: w,
+      is_visible: true,
     };
   });
 

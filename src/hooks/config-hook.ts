@@ -31,7 +31,30 @@ export interface Config {
   winwinmap_summon_shortcut: string | undefined;
   showMap: boolean;
   opened: boolean;
+  nameFilter: Set<string>;
+  exeNameFilter: Set<string>;
 }
+
+interface ConfigFile extends Omit<Config, "nameFilter" | "exeNameFilter"> {
+  nameFilter: string[];
+  exeNameFilter: string[];
+}
+
+const ConfigFile2Config = (cnfgFile: ConfigFile): Config => {
+  return {
+    ...cnfgFile,
+    nameFilter: new Set(cnfgFile.nameFilter),
+    exeNameFilter: new Set(cnfgFile.exeNameFilter),
+  };
+};
+
+const Config2ConfigFile = (cnfg: Config): ConfigFile => {
+  return {
+    ...cnfg,
+    nameFilter: Array.from(cnfg.nameFilter),
+    exeNameFilter: Array.from(cnfg.exeNameFilter),
+  };
+};
 
 const DefaultConfig = () => {
   return {
@@ -48,8 +71,12 @@ const DefaultConfig = () => {
       width: 0,
       height: 0,
     },
+    auto_summon_shortcut: "",
+    winwinmap_summon_shortcut: "",
     showMap: true,
     opened: false,
+    nameFilter: new Set(),
+    exeNameFilter: new Set(),
   } as Config;
 };
 
@@ -63,6 +90,10 @@ export interface ConfigMethods {
   setWinWinMapSummonShortcut: (shortcut: string) => void;
   toggleShowMap: () => void;
   toggleOpened: () => void;
+  addFilteredName: (name: string) => void;
+  removeFilteredName: (name: string) => void;
+  addFilteredExeName: (name: string) => void;
+  removeFilteredExeName: (name: string) => void;
 }
 
 type useConfigRes = [Config | undefined, ConfigMethods];
@@ -127,6 +158,30 @@ const useConfig = (): useConfigRes => {
     setConfig({ ...c });
   };
 
+  const addFilteredName = (name: string) => {
+    const c = config ?? DefaultConfig();
+    c.nameFilter.add(name);
+    setConfig({ ...c });
+  };
+
+  const addFilteredExeName = (name: string) => {
+    const c = config ?? DefaultConfig();
+    c.exeNameFilter.add(name);
+    setConfig({ ...c });
+  };
+
+  const removeFilteredName = (name: string) => {
+    const c = config ?? DefaultConfig();
+    c.nameFilter.delete(name);
+    setConfig({ ...c });
+  };
+
+  const removeFilteredExeName = (name: string) => {
+    const c = config ?? DefaultConfig();
+    c.exeNameFilter.delete(name);
+    setConfig({ ...c });
+  };
+
   useEffect(() => {
     if (initializeAsyncFn.current !== undefined) {
       return;
@@ -137,7 +192,8 @@ const useConfig = (): useConfigRes => {
         const profileBookStr = await readTextFile("config.json", {
           dir: BaseDirectory.AppConfig,
         });
-        const config = JSON.parse(profileBookStr) as Config;
+        const configFile = JSON.parse(profileBookStr) as ConfigFile;
+        const config = { ...DefaultConfig(), ...ConfigFile2Config(configFile) };
         setConfig(config);
       } catch (error) {
         console.warn(error);
@@ -163,7 +219,8 @@ const useConfig = (): useConfigRes => {
         await createDir("", { dir: BaseDirectory.AppConfig });
       }
 
-      await writeTextFile("config.json", JSON.stringify(config), {
+      const configFile = Config2ConfigFile(config);
+      await writeTextFile("config.json", JSON.stringify(configFile), {
         dir: BaseDirectory.AppConfig,
       });
 
@@ -230,6 +287,10 @@ const useConfig = (): useConfigRes => {
       setWinWinMapSummonShortcut,
       toggleShowMap,
       toggleOpened,
+      addFilteredName,
+      removeFilteredName,
+      addFilteredExeName,
+      removeFilteredExeName,
     },
   ];
 };

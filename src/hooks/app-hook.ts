@@ -6,6 +6,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import useFrames from "@/hooks/frame-hook";
 import { FramesInfo } from "@/hooks/frame-hook";
 import { SetTargetProps } from "@/hooks/frame-hook";
+import { WinInfo } from "@/winwin-type";
 
 type useAppStateRes = [
   FramesInfo | undefined,
@@ -19,15 +20,6 @@ type useAppStateRes = [
 interface Payload {
   kind: "active" | "move" | "destroy";
   hwnd: number;
-}
-
-interface WinInfo {
-  hwnd: number;
-  title: string;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
 }
 
 const isAllowedAccess = (hwnd: number, accessable_windows: WinInfo[]) => {
@@ -108,7 +100,9 @@ const tryAutoSummon = async (
 ) => {
   let winInfo;
   try {
-    winInfo = await invoke<WinInfo>("get_window", { hwnd: e.payload.hwnd });
+    winInfo = await invoke<WinInfo>("get_window", {
+      hwnd: e.payload.hwnd,
+    });
   } catch {
     return;
   }
@@ -226,6 +220,13 @@ const useAppState = (): useAppStateRes => {
       }
     })();
   }, [config]);
+
+  frames?.windows.forEach((w) => {
+    const name_incld = config?.nameFilter.has(w.original.title) ?? false;
+    const exe_name_incld =
+      config?.exeNameFilter.has(w.original.exe_name ?? "-") ?? false;
+    w.is_visible = !(name_incld || exe_name_incld);
+  });
 
   return [frames, config, configMethods, updateFrames, target, setTarget];
 };

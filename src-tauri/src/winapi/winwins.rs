@@ -1,5 +1,6 @@
 use crate::winapi::structs::WinInfo;
 use crate::winapi::virtual_desktop::VirtualDesktopManager as VDM;
+use crate::winapi::winprocess::get_exe_name;
 use anyhow::{anyhow, Result};
 use crossbeam::channel::{Receiver, Sender};
 use once_cell::sync::Lazy;
@@ -60,9 +61,18 @@ fn judge_active_window(hwnd: HWND) -> Result<Option<WinInfo>> {
         return Ok(None);
     }
 
+    let exe_name = match get_exe_name(hwnd) {
+        Ok(exe_name) => Some(exe_name),
+        Err(e) => {
+            eprintln!("Warn: failed to get_exe_name: {}", e);
+            None
+        }
+    };
+
     Ok(Some(WinInfo {
         hwnd,
         title,
+        exe_name,
         left: window_info.rcWindow.left,
         top: window_info.rcWindow.top,
         width,

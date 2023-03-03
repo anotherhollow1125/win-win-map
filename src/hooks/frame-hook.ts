@@ -16,6 +16,7 @@ export interface WindowAttr {
   height: number;
   is_relative: boolean;
   original: WinInfo; // YAGNI原則的には良くないけど表示用にオリジナルの情報をすべて残したいというモチベーション
+  is_visible: boolean;
 }
 
 export interface FramesInfo {
