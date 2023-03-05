@@ -12,15 +12,13 @@ type useAppStateRes = [
   frames: FramesInfo | undefined,
   config: Config | undefined,
   configMethods: ConfigMethods,
-  updateFrames: (ds: DragState) => Promise<void>,
+  updateFrames: () => Promise<void>,
   targetForceRefresh: (
     targettingHwnd: number | undefined,
     windows: WindowAttr[]
   ) => void,
   target: WindowAttr | undefined,
   setTarget: (w: WindowAttr) => void,
-  dragState: DragState,
-  setDragState: (ds: DragState) => void,
   canvasInfo: CanvasInfo
 ];
 
@@ -69,8 +67,6 @@ export const ForceSummonWindow = async (
     });
   }, 100);
 };
-
-export type DragState = "idling" | "dragging";
 
 const inThreshold = (cnfg: Config, winInfo: WinInfo): boolean => {
   if (cnfg.auto_summon_threshold === undefined) {
@@ -171,7 +167,6 @@ export const ManualSummonWindow = (
 };
 
 const useAppState = (): useAppStateRes => {
-  const [dragState, setDragState] = useState<DragState>("idling");
   const [
     frames,
     updateFrames,
@@ -184,7 +179,7 @@ const useAppState = (): useAppStateRes => {
   const [config, configMethods] = useConfig();
   const unlisten = useRef<(() => void) | undefined>(undefined);
 
-  const setListenFunc = async (cnfg: Config, ds: DragState) => {
+  const setListenFunc = async (cnfg: Config) => {
     /*
     if (unlisten.current !== undefined) {
       unlisten.current?.();
@@ -197,7 +192,7 @@ const useAppState = (): useAppStateRes => {
 
     const unlstn = await listen<Payload>("update", async (e) => {
       await tryAutoSummon(e, cnfg, accessable_windows);
-      await updateFrames(ds);
+      await updateFrames();
     });
     // init時二重呼び出しに対処するため、await後に解除
     if (unlisten.current !== undefined) {
@@ -208,9 +203,9 @@ const useAppState = (): useAppStateRes => {
 
   useEffect(() => {
     (async () => {
-      await updateFrames(dragState);
+      await updateFrames();
       if (config !== undefined) {
-        await setListenFunc(config, dragState);
+        await setListenFunc(config);
       }
     })();
     window.addEventListener("resize", () => {
@@ -219,14 +214,14 @@ const useAppState = (): useAppStateRes => {
   }, []);
 
   useEffect(() => {
-    updateFrames(dragState);
+    updateFrames();
   }, [appWH]);
 
   useEffect(() => {
     (async () => {
       if (config !== undefined) {
         // console.log("setListenFunc");
-        await setListenFunc(config, dragState);
+        await setListenFunc(config);
       }
     })();
   }, [config]);
@@ -246,8 +241,6 @@ const useAppState = (): useAppStateRes => {
     targetForceRefresh,
     target,
     setTarget,
-    dragState,
-    setDragState,
     canvasInfo,
   ];
 };

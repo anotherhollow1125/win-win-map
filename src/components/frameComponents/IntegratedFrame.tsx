@@ -3,7 +3,6 @@ import MonitorFrame from "@/components/frameComponents/MonitorFrame";
 import { FramesInfo, CanvasInfo } from "@/hooks/frame-hook";
 import Draggable from "react-draggable";
 import { useRef, useState, useEffect } from "react";
-import { DragState } from "@/hooks/app-hook";
 import { tryDragMove } from "@/drag-util";
 import { Config } from "@/hooks/config-hook";
 import { WindowAttr } from "@/hooks/frame-hook";
@@ -12,8 +11,6 @@ export interface IntegratedFrameProps {
   framesInfo: FramesInfo;
   forceUpdate: () => void;
   target: WindowAttr | undefined;
-  dragState: DragState;
-  setDragState: (dragState: DragState) => void;
   canvasInfo: CanvasInfo;
   config: Config;
 }
@@ -22,8 +19,6 @@ const FrameManager = ({
   framesInfo: { width, height, monitors, windows },
   forceUpdate,
   target,
-  dragState,
-  setDragState,
   canvasInfo,
   config,
 }: IntegratedFrameProps) => {
@@ -31,7 +26,7 @@ const FrameManager = ({
   const [targetPos, setTargetPos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    if (target && dragState != "dragging") {
+    if (target) {
       const newPos = { x: target.left, y: target.top };
       setTargetPos(newPos);
     }
@@ -43,15 +38,11 @@ const FrameManager = ({
       axis="both"
       position={targetPos}
       bounds={{ left: 0, top: 0, right: width, bottom: height }}
-      onStart={() => {
-        setDragState("dragging");
-      }}
       onStop={(_e, data) => {
         const pos = { x: data.x, y: data.y };
         tryDragMove(target.original, pos, canvasInfo, config).then((res) => {
           // 動機ズレ防止
           setTimeout(() => {
-            setDragState("idling");
             forceUpdate();
           }, 100);
         });

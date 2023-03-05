@@ -14,8 +14,6 @@ const AppMain = () => {
     tagetForceRefresh,
     target,
     setTarget,
-    dragState,
-    setDragState,
     canvasInfo,
   ] = useAppState();
   const isMobile = useMediaQuery("(max-width: 600px)");
@@ -34,8 +32,6 @@ const AppMain = () => {
               tagetForceRefresh(target?.original.hwnd, framesInfo.windows)
             }
             target={target}
-            dragState={dragState}
-            setDragState={setDragState}
             canvasInfo={canvasInfo}
             config={config}
           />

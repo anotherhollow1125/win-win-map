@@ -1,7 +1,7 @@
 import { useState } from "react";
 import fetchObjects from "@/fetch-objects";
 import { WinInfo } from "@/winwin-type";
-import { DragState } from "./app-hook";
+
 import { Canvas } from "@/winwin-type";
 
 export interface MonitorAttr {
@@ -35,7 +35,7 @@ export interface CanvasInfo {
 
 type useFrameRes = [
   frames: FramesInfo | undefined,
-  updateFrames: (dragState: DragState) => Promise<void>,
+  updateFrames: () => Promise<void>,
   targetForceRefresh: (
     targettingHwnd: number | undefined,
     windows: WindowAttr[]
@@ -51,25 +51,24 @@ const useFrame = (): useFrameRes => {
   const [canvas, setCanvas] = useState<Canvas | undefined>(undefined);
   const [scale, setScale] = useState<number | undefined>(undefined);
 
-  const setTarget = (w: WindowAttr) => {
-    if (!w.is_relative) {
-      setTargetInner({ ...w });
-    }
-  };
-
-  const updateFrames = async (dragState: DragState) => {
-    if (dragState == "dragging") {
+  const setTarget = (w: WindowAttr | undefined) => {
+    if (w === undefined) {
+      setTargetInner(undefined);
       return;
     }
 
+    if (w.is_relative) {
+      return;
+    }
+
+    setTargetInner({ ...w });
+  };
+
+  const updateFrames = async () => {
     const [frames, cnvs, scl] = await fetchObjects();
 
-    frames.windows.forEach((w) => {
-      // 状況的にここのsetTargetと外でのsetTargetが競合することはないはず
-      if (w.original.is_foreground) {
-        setTarget(w);
-      }
-    });
+    const newTarget = frames.windows.find((w) => w.original.is_foreground);
+    setTarget(newTarget);
 
     setFrames(frames);
     setCanvas(cnvs);
@@ -82,11 +81,10 @@ const useFrame = (): useFrameRes => {
   ) => {
     const [frames, cnvs, scl] = await fetchObjects();
 
-    frames.windows.forEach((w) => {
-      if (targettingHwnd !== undefined && w.original.hwnd == targettingHwnd) {
-        setTarget(w);
-      }
-    });
+    const newTarget = frames.windows.find(
+      (w) => targettingHwnd !== undefined && w.original.hwnd == targettingHwnd
+    );
+    setTarget(newTarget);
 
     setFrames(frames);
     setCanvas(cnvs);
