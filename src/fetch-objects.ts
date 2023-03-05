@@ -18,7 +18,9 @@ export const calcScale = (
   return { scale, w_is_larger };
 };
 
-export const fetchObjects = async (): Promise<FramesInfo> => {
+type fetchObjectsRes = [framesInfo: FramesInfo, canvas: Canvas, scale: number];
+
+export const fetchObjects = async (): Promise<fetchObjectsRes> => {
   const canvas = await invoke<Canvas>("get_canvas");
   const { scale } = calcScale(
     canvas.max_x - canvas.min_x,
@@ -58,12 +60,16 @@ export const fetchObjects = async (): Promise<FramesInfo> => {
     };
   });
 
-  return {
-    width: (canvas.max_x - canvas.min_x) / scale,
-    height: (canvas.max_y - canvas.min_y) / scale,
-    monitors: monitors,
-    windows: [...windows],
-  };
+  return [
+    {
+      width: (canvas.max_x - canvas.min_x) / scale,
+      height: (canvas.max_y - canvas.min_y) / scale,
+      monitors: monitors,
+      windows: [...windows],
+    },
+    canvas,
+    scale,
+  ];
 };
 
 export default fetchObjects;

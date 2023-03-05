@@ -4,6 +4,7 @@ import CursorConfigElm from "@/components/configComponents/CursorConfigElm";
 import SummonPosConfElm from "@/components/configComponents/SummonPosConfElm";
 import AutoSummonConfElm from "@/components/configComponents/autoSummon/AutoSummonConfElm";
 import WinWinMapSummonConfElm from "@/components/configComponents/WinWinMapSummonConfElm";
+import DragTermMarginConfElm from "@/components/configComponents/DragTermMarginConfElm";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -146,8 +147,11 @@ const ConfigElm = ({ config, configMethods }: ConfigElmProps) => {
       <Grid item xs={12}>
         <AutoSummonConfElm config={config} configMethods={configMethods} />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <WinWinMapSummonConfElm config={config} configMethods={configMethods} />
+      </Grid>
+      <Grid item xs={6}>
+        <DragTermMarginConfElm config={config} configMethods={configMethods} />
       </Grid>
       <Grid item xs={12}>
         {`Ver. ${version}`}

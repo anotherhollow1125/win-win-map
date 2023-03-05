@@ -33,6 +33,7 @@ export interface Config {
   opened: boolean;
   nameFilter: Set<string>;
   exeNameFilter: Set<string>;
+  dragTermMargin: number;
 }
 
 interface ConfigFile extends Omit<Config, "nameFilter" | "exeNameFilter"> {
@@ -77,6 +78,7 @@ const DefaultConfig = () => {
     opened: false,
     nameFilter: new Set(),
     exeNameFilter: new Set(),
+    dragTermMargin: 10,
   } as Config;
 };
 
@@ -94,6 +96,7 @@ export interface ConfigMethods {
   removeFilteredName: (name: string) => void;
   addFilteredExeName: (name: string) => void;
   removeFilteredExeName: (name: string) => void;
+  setDragTermMargin: (margin: number) => void;
 }
 
 type useConfigRes = [Config | undefined, ConfigMethods];
@@ -179,6 +182,12 @@ const useConfig = (): useConfigRes => {
   const removeFilteredExeName = (name: string) => {
     const c = config ?? DefaultConfig();
     c.exeNameFilter.delete(name);
+    setConfig({ ...c });
+  };
+
+  const setDragTermMargin = (margin: number) => {
+    const c = config ?? DefaultConfig();
+    c.dragTermMargin = margin;
     setConfig({ ...c });
   };
 
@@ -291,6 +300,7 @@ const useConfig = (): useConfigRes => {
       removeFilteredName,
       addFilteredExeName,
       removeFilteredExeName,
+      setDragTermMargin,
     },
   ];
 };

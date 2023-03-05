@@ -4,17 +4,24 @@ import useConfig from "@/hooks/config-hook";
 import { Config, ConfigMethods } from "@/hooks/config-hook";
 import { invoke } from "@tauri-apps/api/tauri";
 import useFrames from "@/hooks/frame-hook";
-import { FramesInfo } from "@/hooks/frame-hook";
-import { SetTargetProps } from "@/hooks/frame-hook";
+import { FramesInfo, CanvasInfo } from "@/hooks/frame-hook";
+import { WindowAttr } from "@/hooks/frame-hook";
 import { WinInfo } from "@/winwin-type";
 
 type useAppStateRes = [
-  FramesInfo | undefined,
-  Config | undefined,
-  ConfigMethods,
-  () => Promise<void>,
-  number | undefined,
-  (w: SetTargetProps) => void
+  frames: FramesInfo | undefined,
+  config: Config | undefined,
+  configMethods: ConfigMethods,
+  updateFrames: (ds: DragState) => Promise<void>,
+  targetForceRefresh: (
+    targettingHwnd: number | undefined,
+    windows: WindowAttr[]
+  ) => void,
+  target: WindowAttr | undefined,
+  setTarget: (w: WindowAttr) => void,
+  dragState: DragState,
+  setDragState: (ds: DragState) => void,
+  canvasInfo: CanvasInfo
 ];
 
 interface Payload {
@@ -47,8 +54,7 @@ const summonWindow = async (
   }, 100);
 };
 
-/*
-const forceSummonWindow = async (
+export const ForceSummonWindow = async (
   hwnd: number,
   pos: { x: number; y: number },
   wh: { width: number; height: number }
@@ -63,7 +69,8 @@ const forceSummonWindow = async (
     });
   }, 100);
 };
-*/
+
+export type DragState = "idling" | "dragging";
 
 const inThreshold = (cnfg: Config, winInfo: WinInfo): boolean => {
   if (cnfg.auto_summon_threshold === undefined) {
@@ -144,7 +151,6 @@ export const ManualSummonWindow = (
   hwnd: number,
   cnfg: Config,
   accessable_windows: WinInfo[]
-  // force: boolean = false
 ) => {
   if (
     cnfg === undefined ||
@@ -155,13 +161,6 @@ export const ManualSummonWindow = (
     return;
   }
 
-  /*
-  if (force) {
-    forceSummonWindow(hwnd, cnfg.summon_point, summonSize(cnfg));
-  } else {
-    summonWindow(hwnd, accessable_windows, cnfg.summon_point, summonSize(cnfg));
-  }
-  */
   summonWindow(hwnd, accessable_windows, cnfg.summon_point, summonSize(cnfg));
 
   setTimeout(async () => {
@@ -172,22 +171,33 @@ export const ManualSummonWindow = (
 };
 
 const useAppState = (): useAppStateRes => {
-  const [frames, updateFrames, target, setTarget] = useFrames();
+  const [dragState, setDragState] = useState<DragState>("idling");
+  const [
+    frames,
+    updateFrames,
+    targetForceRefresh,
+    target,
+    setTarget,
+    canvasInfo,
+  ] = useFrames();
   const [appWH, setAppWH] = useState<undefined[]>([undefined]); // resize イベント用のダミー
   const [config, configMethods] = useConfig();
   const unlisten = useRef<(() => void) | undefined>(undefined);
 
-  const setListenFunc = async (cnfg: Config) => {
+  const setListenFunc = async (cnfg: Config, ds: DragState) => {
     /*
     if (unlisten.current !== undefined) {
       unlisten.current?.();
     }
     */
-    const accessable_windows = frames?.windows.map((w) => w.original) ?? [];
+    const accessable_windows =
+      frames?.windows
+        .flatMap((w) => (w.is_visible ? [w] : []))
+        .map((w) => w.original) ?? [];
 
     const unlstn = await listen<Payload>("update", async (e) => {
       await tryAutoSummon(e, cnfg, accessable_windows);
-      await updateFrames();
+      await updateFrames(ds);
     });
     // init時二重呼び出しに対処するため、await後に解除
     if (unlisten.current !== undefined) {
@@ -198,9 +208,9 @@ const useAppState = (): useAppStateRes => {
 
   useEffect(() => {
     (async () => {
-      await updateFrames();
+      await updateFrames(dragState);
       if (config !== undefined) {
-        await setListenFunc(config);
+        await setListenFunc(config, dragState);
       }
     })();
     window.addEventListener("resize", () => {
@@ -209,14 +219,14 @@ const useAppState = (): useAppStateRes => {
   }, []);
 
   useEffect(() => {
-    updateFrames();
+    updateFrames(dragState);
   }, [appWH]);
 
   useEffect(() => {
     (async () => {
       if (config !== undefined) {
         // console.log("setListenFunc");
-        await setListenFunc(config);
+        await setListenFunc(config, dragState);
       }
     })();
   }, [config]);
@@ -228,7 +238,18 @@ const useAppState = (): useAppStateRes => {
     w.is_visible = !(name_incld || exe_name_incld);
   });
 
-  return [frames, config, configMethods, updateFrames, target, setTarget];
+  return [
+    frames,
+    config,
+    configMethods,
+    updateFrames,
+    targetForceRefresh,
+    target,
+    setTarget,
+    dragState,
+    setDragState,
+    canvasInfo,
+  ];
 };
 
 export default useAppState;

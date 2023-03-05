@@ -4,7 +4,7 @@ import { ManualSummonWindow } from "@/hooks/app-hook";
 import IconButton from "@mui/material/IconButton";
 import MoveUpIcon from "@mui/icons-material/MoveUp";
 import { Config, ConfigMethods } from "@/hooks/config-hook";
-import { WindowAttr, SetTargetProps } from "@/hooks/frame-hook";
+import { WindowAttr } from "@/hooks/frame-hook";
 import { invoke } from "@tauri-apps/api";
 import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
@@ -16,7 +16,7 @@ interface FrameRowComponentProps {
   config: Config;
   configMethods: ConfigMethods;
   target: number | undefined;
-  setTarget: (w: SetTargetProps) => void;
+  setTarget: (w: WindowAttr) => void;
   accessable_windows: WinInfo[];
 }
 
@@ -89,10 +89,7 @@ const FrameRowComponent = ({
           if (window.original.hwnd === target) {
             return;
           }
-          setTarget({
-            is_relative: window.is_relative,
-            hwnd: window.original.hwnd,
-          });
+          setTarget(window);
         }}
         onDoubleClick={() => {
           if (target === undefined) {

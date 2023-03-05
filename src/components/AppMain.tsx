@@ -6,8 +6,18 @@ import { useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 
 const AppMain = () => {
-  const [framesInfo, config, configMethods, updateFrames, target, setTarget] =
-    useAppState();
+  const [
+    framesInfo,
+    config,
+    configMethods,
+    updateFrames,
+    tagetForceRefresh,
+    target,
+    setTarget,
+    dragState,
+    setDragState,
+    canvasInfo,
+  ] = useAppState();
   const isMobile = useMediaQuery("(max-width: 600px)");
   const isPC = !isMobile;
 
@@ -17,11 +27,17 @@ const AppMain = () => {
         className="mapZone"
         sx={{ position: config?.opened ?? false ? "static" : "sticky" }}
       >
-        {(config?.showMap ?? false) && isPC && framesInfo ? (
+        {config !== undefined && config.showMap && isPC && framesInfo ? (
           <IntegratedFrame
             framesInfo={framesInfo}
-            clickHandle={() => updateFrames()}
-            target_hwnd={target}
+            forceUpdate={() =>
+              tagetForceRefresh(target?.original.hwnd, framesInfo.windows)
+            }
+            target={target}
+            dragState={dragState}
+            setDragState={setDragState}
+            canvasInfo={canvasInfo}
+            config={config}
           />
         ) : (
           <></>
@@ -37,7 +53,7 @@ const AppMain = () => {
           windows={framesInfo.windows}
           config={config}
           configMethods={configMethods}
-          target={target}
+          target_hwnd={target?.original.hwnd}
           setTarget={setTarget}
           accessable_windows={framesInfo.windows.map((w) => w.original)}
         />
