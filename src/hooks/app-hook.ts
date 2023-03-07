@@ -7,6 +7,7 @@ import useFrames from "@/hooks/frame-hook";
 import { FramesInfo, CanvasInfo } from "@/hooks/frame-hook";
 import { WindowAttr } from "@/hooks/frame-hook";
 import { WinInfo } from "@/winwin-type";
+import { DragStateEnum } from "@/app-store";
 
 type useAppStateRes = [
   frames: FramesInfo | undefined,
