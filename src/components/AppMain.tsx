@@ -34,6 +34,7 @@ const AppMain = () => {
             target={target}
             canvasInfo={canvasInfo}
             config={config}
+            setTarget={setTarget}
           />
         ) : (
           <></>

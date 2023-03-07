@@ -5,6 +5,7 @@ export interface WindowFrameProps {
   top: number;
   is_target: boolean;
   is_active: boolean;
+  onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
 const WindowFrame = (props: WindowFrameProps) => {
@@ -14,6 +15,7 @@ const WindowFrame = (props: WindowFrameProps) => {
         props.is_target ? "target" : ""
       }`}
       style={props}
+      onClick={props.onClick}
     ></div>
   );
 };

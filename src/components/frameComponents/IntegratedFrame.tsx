@@ -15,6 +15,7 @@ export interface IntegratedFrameProps {
   target: WindowAttr | undefined;
   canvasInfo: CanvasInfo;
   config: Config;
+  setTarget: (w: WindowAttr) => void;
 }
 
 const FrameManager = ({
@@ -23,6 +24,7 @@ const FrameManager = ({
   target,
   canvasInfo,
   config,
+  setTarget,
 }: IntegratedFrameProps) => {
   const targetNodeRef = useRef(null);
   const [targetPos, setTargetPos] = useState({ x: 0, y: 0 });
@@ -71,6 +73,7 @@ const FrameManager = ({
           {...target}
           left={0}
           top={0}
+          onClick={() => {}}
         />
       </div>
     </Draggable>
@@ -99,6 +102,13 @@ const FrameManager = ({
                     is_target={false}
                     is_active={window.original.is_foreground}
                     {...window}
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      if (window.original.hwnd === target?.original.hwnd) {
+                        return;
+                      }
+                      setTarget(window);
+                    }}
                   />,
                 ]
               : [];
