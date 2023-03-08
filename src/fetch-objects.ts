@@ -31,11 +31,15 @@ export const fetchObjects = async (): Promise<fetchObjectsRes> => {
 
   const monitors = [
     ...canvas.monitors.map((rect) => {
+      const real_width = rect.right - rect.left;
+      const real_height = rect.bottom - rect.top;
+      const zIndex = -(real_width * real_height);
       return {
         left: (rect.left - canvas.min_x) / scale,
         top: (rect.top - canvas.min_y) / scale,
-        width: (rect.right - rect.left) / scale,
-        height: (rect.bottom - rect.top) / scale,
+        width: real_width / scale,
+        height: real_height / scale,
+        zIndex,
       };
     }),
   ];
@@ -49,6 +53,8 @@ export const fetchObjects = async (): Promise<fetchObjectsRes> => {
   // console.log("windows_raw", windows_raw);
 
   const windows = windows_raw.map((w) => {
+    const zIndex = -(w.width * w.height);
+    // const zIndex = 0;
     return {
       left: (w.left - canvas.min_x) / scale,
       top: (w.top - canvas.min_y) / scale,
@@ -57,6 +63,7 @@ export const fetchObjects = async (): Promise<fetchObjectsRes> => {
       is_relative: thread_windows_hwnds.includes(w.hwnd),
       original: w,
       is_visible: true,
+      zIndex,
     };
   });
 

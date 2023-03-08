@@ -47,6 +47,7 @@ export const tryDragMove = async (
   raw_pos: { x: number; y: number },
   canvasInfo: CanvasInfo,
   config: Config
+  // littleShrink: boolean = false // 移動時に少し小さくすればいい戦法はあまり意味なかったです
 ): Promise<boolean> => {
   const pos = rawPos2Pos(raw_pos, canvasInfo);
 

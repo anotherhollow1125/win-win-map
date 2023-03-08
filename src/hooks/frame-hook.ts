@@ -11,6 +11,7 @@ export interface MonitorAttr {
   top: number;
   width: number;
   height: number;
+  zIndex: number;
 }
 
 export interface WindowAttr {
@@ -21,6 +22,7 @@ export interface WindowAttr {
   is_relative: boolean;
   original: WinInfo; // YAGNI原則的には良くないけど表示用にオリジナルの情報をすべて残したいというモチベーション
   is_visible: boolean;
+  zIndex: number;
 }
 
 export interface FramesInfo {
@@ -33,6 +35,7 @@ export interface FramesInfo {
 export interface CanvasInfo {
   canvas: Canvas | undefined;
   scale: number | undefined;
+  area: number | undefined;
 }
 
 type useFrameRes = [
@@ -108,13 +111,17 @@ const useFrame = (): useFrameRes => {
     setScale(scl);
   };
 
+  const area = canvas
+    ? (canvas.max_x - canvas.min_x) * (canvas.max_y - canvas.min_y)
+    : undefined;
+
   return [
     frames,
     updateFrames,
     targetForceRefresh,
     target,
     setTarget,
-    { canvas, scale },
+    { canvas, scale, area },
   ];
 };
 

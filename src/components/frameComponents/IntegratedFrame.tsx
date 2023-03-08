@@ -38,54 +38,59 @@ const FrameManager = ({
     }
   }, [target]);
 
-  const targetFrame = target ? (
-    <Draggable
-      nodeRef={targetNodeRef}
-      axis="both"
-      position={targetPos}
-      bounds={{ left: 0, top: 0, right: width, bottom: height }}
-      onStart={() => {
-        // dragState.current = "dragging";
-        dispatch(setDragging());
-      }}
-      onStop={(_e, data) => {
-        const pos = { x: data.x, y: data.y };
-        tryDragMove(target.original, pos, canvasInfo, config).then((res) => {
-          // 動機ズレ防止
-          setTimeout(() => {
-            forceUpdate();
-            // dragState.current = "idling";
-            dispatch(setIdling());
-          }, 100);
-        });
-      }}
-      onDrag={(_e, data) => {
-        const { x, y } = data;
-        setTargetPos({ x, y });
-        const pos = { x: data.x, y: data.y };
-        tryDragMove(target.original, pos, canvasInfo, config);
-      }}
-    >
-      <div ref={targetNodeRef}>
-        <WindowFrame
-          is_target={true}
-          is_active={target.original.is_foreground}
-          {...target}
-          left={0}
-          top={0}
-          onClick={() => {}}
-        />
-      </div>
-    </Draggable>
-  ) : (
-    <></>
-  );
+  const targetFrame =
+    target && target.is_visible ? (
+      <Draggable
+        nodeRef={targetNodeRef}
+        axis="both"
+        position={targetPos}
+        bounds={{ left: 0, top: 0, right: width, bottom: height }}
+        onStart={() => {
+          // dragState.current = "dragging";
+          dispatch(setDragging());
+        }}
+        onStop={(_e, data) => {
+          const pos = { x: data.x, y: data.y };
+          tryDragMove(target.original, pos, canvasInfo, config).then((res) => {
+            // 動機ズレ防止
+            setTimeout(() => {
+              forceUpdate();
+              // dragState.current = "idling";
+              dispatch(setIdling());
+            }, 100);
+          });
+        }}
+        onDrag={(_e, data) => {
+          const { x, y } = data;
+          setTargetPos({ x, y });
+          const pos = { x: data.x, y: data.y };
+          tryDragMove(target.original, pos, canvasInfo, config);
+        }}
+      >
+        <div ref={targetNodeRef}>
+          <WindowFrame
+            is_target={true}
+            is_active={target.original.is_foreground}
+            {...target}
+            left={0}
+            top={0}
+            onClick={() => {}}
+          />
+        </div>
+      </Draggable>
+    ) : (
+      <></>
+    );
 
   return (
     <>
       <div
         className="object base"
-        style={{ width: width, height: height }}
+        style={{
+          width: width,
+          height: height,
+          zIndex: -(canvasInfo?.area ?? 0),
+        }}
         onClick={(_e) => forceUpdate()}
       >
         <>

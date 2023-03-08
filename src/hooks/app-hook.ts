@@ -234,6 +234,13 @@ const useAppState = (): useAppStateRes => {
     w.is_visible = !(name_incld || exe_name_incld);
   });
 
+  if (target) {
+    const name_incld = config?.nameFilter.has(target.original.title) ?? false;
+    const exe_name_incld =
+      config?.exeNameFilter.has(target.original.exe_name ?? "-") ?? false;
+    target.is_visible = !(name_incld || exe_name_incld);
+  }
+
   return [
     frames,
     config,
