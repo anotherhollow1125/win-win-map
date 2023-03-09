@@ -1,7 +1,5 @@
-# Tauri + React + Typescript
+# win-win-map
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+(README.md 執筆中...)
 
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+[![Release](https://github.com/anotherhollow1125/win-win-map/actions/workflows/build.yaml/badge.svg)](https://github.com/anotherhollow1125/win-win-map/actions/workflows/build.yaml)
