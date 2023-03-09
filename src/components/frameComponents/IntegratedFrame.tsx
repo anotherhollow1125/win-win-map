@@ -89,7 +89,8 @@ const FrameManager = ({
         style={{
           width: width,
           height: height,
-          zIndex: -(canvasInfo?.area ?? 0),
+          // zIndex: -(canvasInfo?.area ?? 0),
+          zIndex: 0,
         }}
         onClick={(_e) => forceUpdate()}
       >

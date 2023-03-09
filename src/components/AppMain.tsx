@@ -23,7 +23,9 @@ const AppMain = () => {
     <>
       <Box
         className="mapZone"
-        sx={{ position: config?.opened ?? false ? "static" : "sticky" }}
+        sx={{
+          position: config?.opened ?? false ? "static" : "sticky",
+        }}
       >
         {config !== undefined && config.showMap && isPC && framesInfo ? (
           <IntegratedFrame
